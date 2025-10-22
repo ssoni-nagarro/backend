@@ -1,10 +1,10 @@
-"""Resolver loader for declarative GraphQL resolver configs"""
+"""Configuration loader for declarative GraphQL resolver configs"""
 import json
 import os
 from typing import Dict, Any, Optional
 from pathlib import Path
 
-class ResolverLoader:
+class ConfigLoader:
     """Loads and manages declarative configuration for GraphQL resolvers"""
     
     def __init__(self, config_path: str = "config"):
@@ -60,6 +60,3 @@ class ResolverLoader:
             handler_name = config_file.stem.replace("_resolver", "")
             handlers.append(handler_name)
         return handlers
-
-# Global resolver loader instance
-resolver_loader = ResolverLoader()

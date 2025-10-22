@@ -1,4 +1,4 @@
-"""User Handler GraphQL Resolver"""
+"""User Handler GraphQL Resolver - Lambda Optimized"""
 import json
 from datetime import datetime
 from typing import Optional, List, Dict, Any
@@ -12,16 +12,19 @@ from domain.exceptions.user_exceptions import (
 )
 from orm.repositories.user_respository_impl import UserRepositoryImpl
 
-def get_user_service():
-    """Get user service with database session"""
-    db_session = DatabaseSession("sqlite+aiosqlite:///./test.db")
-    # Note: In a real implementation, you'd want to manage the session lifecycle properly
-    # This is a simplified version for the GraphQL handler pattern
-    return db_session
+# Lambda optimization: Create database session outside handler to reduce cold start
+_db_session = None
+
+def get_db_session():
+    """Get or create database session (Lambda optimized)"""
+    global _db_session
+    if _db_session is None:
+        _db_session = DatabaseSession("sqlite+aiosqlite:///./test.db")
+    return _db_session
 
 def handler(event, context):
-    """Domain-level GraphQL handler for User operations"""
-    db_session = get_user_service()
+    """Lambda-optimized GraphQL handler for User operations"""
+    db_session = get_db_session()
     
     try:
         # Handle GraphQL request format
@@ -33,6 +36,16 @@ def handler(event, context):
             # Fallback to direct format
             operation = event.get("fieldName", "createUser")
             args = event.get("arguments", {})
+        
+        # Handle GraphQL input object for mutations
+        if operation in ["createUser", "updateUser"] and "input" in args:
+            # Extract fields from input object
+            input_data = args["input"]
+            if isinstance(input_data, dict):
+                # Merge input fields into args
+                args.update(input_data)
+                # Remove the input wrapper
+                args.pop("input", None)
         
         if operation == "getUser":
             return get_user_flow(db_session, args)
@@ -54,12 +67,10 @@ def handler(event, context):
         return {
             "error": f"Internal server error: {str(e)}"
         }
-    finally:
-        # Close database session
-        if hasattr(db_session, 'close'):
-            db_session.close()
+    # Note: Don't close database session in Lambda - keep it for reuse
 
-async def create_user_flow(db_session, args):
+# Async flow functions - can be called directly
+async def create_user_flow_async(db_session, args):
     """Coordinate user creation"""
     async for session in db_session.get_session():
         user_repository = UserRepositoryImpl(session)
@@ -87,24 +98,25 @@ async def create_user_flow(db_session, args):
                 "phone": user.phone,
                 "status": user.status.value,
                 "roles": [role.value for role in user.roles],
-                "createdAt": user.created_at.isoformat(),
-                "updatedAt": user.updated_at.isoformat()
+                "createdAt": user.created_at,
+                "updatedAt": user.updated_at
             }
         
         except UserAlreadyExistsException as e:
-            return {
-                "error": str(e)
-            }
+            return {"error": str(e)}
         except InvalidUserDataException as e:
-            return {
-                "error": str(e)
-            }
+            return {"error": str(e)}
         except Exception as e:
-            return {
-                "error": f"Failed to create user: {str(e)}"
-            }
+            return {"error": f"Failed to create user: {str(e)}"}
+    
+    return {"error": "No database session available"}
 
-async def get_user_flow(db_session, args):
+def create_user_flow(db_session, args):
+    """Coordinate user creation - synchronous wrapper"""
+    import asyncio
+    return asyncio.run(create_user_flow_async(db_session, args))
+
+async def get_user_flow_async(db_session, args):
     """Get a single user by ID"""
     async for session in db_session.get_session():
         user_repository = UserRepositoryImpl(session)
@@ -113,9 +125,7 @@ async def get_user_flow(db_session, args):
         try:
             user_id = args.get("id")
             if not user_id:
-                return {
-                    "error": "User ID is required"
-                }
+                return {"error": "User ID is required"}
             
             user = await user_service.get_user_by_id(user_id)
             
@@ -127,20 +137,21 @@ async def get_user_flow(db_session, args):
                 "phone": user.phone,
                 "status": user.status.value,
                 "roles": [role.value for role in user.roles],
-                "createdAt": user.created_at.isoformat(),
-                "updatedAt": user.updated_at.isoformat()
+                "createdAt": user.created_at,
+                "updatedAt": user.updated_at
             }
         
         except UserNotFoundException as e:
-            return {
-                "error": str(e)
-            }
+            return {"error": str(e)}
         except Exception as e:
-            return {
-                "error": f"Failed to get user: {str(e)}"
-            }
+            return {"error": f"Failed to get user: {str(e)}"}
 
-async def get_user_by_email_flow(db_session, args):
+def get_user_flow(db_session, args):
+    """Get a single user by ID - synchronous wrapper"""
+    import asyncio
+    return asyncio.run(get_user_flow_async(db_session, args))
+
+async def get_user_by_email_flow_async(db_session, args):
     """Get a single user by email"""
     async for session in db_session.get_session():
         user_repository = UserRepositoryImpl(session)
@@ -149,9 +160,7 @@ async def get_user_by_email_flow(db_session, args):
         try:
             email = args.get("email")
             if not email:
-                return {
-                    "error": "Email is required"
-                }
+                return {"error": "Email is required"}
             
             user = await user_service.get_user_by_email(email)
             
@@ -163,52 +172,33 @@ async def get_user_by_email_flow(db_session, args):
                 "phone": user.phone,
                 "status": user.status.value,
                 "roles": [role.value for role in user.roles],
-                "createdAt": user.created_at.isoformat(),
-                "updatedAt": user.updated_at.isoformat()
+                "createdAt": user.created_at,
+                "updatedAt": user.updated_at
             }
         
         except UserNotFoundException as e:
-            return {
-                "error": str(e)
-            }
+            return {"error": str(e)}
         except Exception as e:
-            return {
-                "error": f"Failed to get user by email: {str(e)}"
-            }
+            return {"error": f"Failed to get user by email: {str(e)}"}
 
-async def list_users_flow(db_session, args):
+def get_user_by_email_flow(db_session, args):
+    """Get a single user by email - synchronous wrapper"""
+    import asyncio
+    return asyncio.run(get_user_by_email_flow_async(db_session, args))
+
+async def list_users_flow_async(db_session, args):
     """List users with filtering and pagination"""
     async for session in db_session.get_session():
         user_repository = UserRepositoryImpl(session)
         user_service = UserService(user_repository)
         
         try:
-            filter_input = args.get("filter", {})
-            
-            # Extract pagination
-            pagination = filter_input.get("pagination", {})
-            limit = pagination.get("limit", 20)
-            skip = pagination.get("skip", 0)
-            
-            # Extract filters
-            status = filter_input.get("status")
-            roles = filter_input.get("roles")
-            email_contains = filter_input.get("emailContains")
-            name_contains = filter_input.get("nameContains")
+            # Extract pagination parameters
+            skip = args.get("skip", 0)
+            limit = args.get("limit", 20)
             
             # Get users from service
             users = await user_service.get_all_users(skip=skip, limit=limit)
-            
-            # Apply additional filtering if needed
-            filtered_users = users
-            if status:
-                filtered_users = [user for user in filtered_users if user.status.value == status]
-            if roles:
-                filtered_users = [user for user in filtered_users if any(role.value in roles for role in user.roles)]
-            if email_contains:
-                filtered_users = [user for user in filtered_users if email_contains.lower() in user.email.lower()]
-            if name_contains:
-                filtered_users = [user for user in filtered_users if name_contains.lower() in f"{user.first_name} {user.last_name}".lower()]
             
             return {
                 "items": [
@@ -220,24 +210,27 @@ async def list_users_flow(db_session, args):
                         "phone": user.phone,
                         "status": user.status.value,
                         "roles": [role.value for role in user.roles],
-                        "createdAt": user.created_at.isoformat(),
-                        "updatedAt": user.updated_at.isoformat()
+                        "createdAt": user.created_at,
+                        "updatedAt": user.updated_at
                     }
-                    for user in filtered_users
+                    for user in users
                 ],
                 "pagination": {
                     "skip": skip,
                     "limit": limit,
-                    "hasMore": len(filtered_users) == limit
+                    "hasMore": len(users) == limit
                 }
             }
         
         except Exception as e:
-            return {
-                "error": f"Failed to list users: {str(e)}"
-            }
+            return {"error": f"Failed to list users: {str(e)}"}
 
-async def update_user_flow(db_session, args):
+def list_users_flow(db_session, args):
+    """List users with filtering and pagination - synchronous wrapper"""
+    import asyncio
+    return asyncio.run(list_users_flow_async(db_session, args))
+
+async def update_user_flow_async(db_session, args):
     """Update an existing user"""
     async for session in db_session.get_session():
         user_repository = UserRepositoryImpl(session)
@@ -246,9 +239,7 @@ async def update_user_flow(db_session, args):
         try:
             user_id = args.get("id")
             if not user_id:
-                return {
-                    "error": "User ID is required"
-                }
+                return {"error": "User ID is required"}
             
             # Extract update fields
             update_data = UpdateUserDTO()
@@ -272,24 +263,23 @@ async def update_user_flow(db_session, args):
                 "phone": user.phone,
                 "status": user.status.value,
                 "roles": [role.value for role in user.roles],
-                "createdAt": user.created_at.isoformat(),
-                "updatedAt": user.updated_at.isoformat()
+                "createdAt": user.created_at,
+                "updatedAt": user.updated_at
             }
         
         except UserNotFoundException as e:
-            return {
-                "error": str(e)
-            }
+            return {"error": str(e)}
         except InvalidUserDataException as e:
-            return {
-                "error": str(e)
-            }
+            return {"error": str(e)}
         except Exception as e:
-            return {
-                "error": f"Failed to update user: {str(e)}"
-            }
+            return {"error": f"Failed to update user: {str(e)}"}
 
-async def delete_user_flow(db_session, args):
+def update_user_flow(db_session, args):
+    """Update an existing user - synchronous wrapper"""
+    import asyncio
+    return asyncio.run(update_user_flow_async(db_session, args))
+
+async def delete_user_flow_async(db_session, args):
     """Delete a user by ID"""
     async for session in db_session.get_session():
         user_repository = UserRepositoryImpl(session)
@@ -298,16 +288,12 @@ async def delete_user_flow(db_session, args):
         try:
             user_id = args.get("id")
             if not user_id:
-                return {
-                    "error": "User ID is required"
-                }
+                return {"error": "User ID is required"}
             
             success = await user_service.delete_user(user_id)
             
             if not success:
-                return {
-                    "error": f"User with id {user_id} not found"
-                }
+                return {"error": f"User with id {user_id} not found"}
             
             return {
                 "status": "success",
@@ -315,10 +301,11 @@ async def delete_user_flow(db_session, args):
             }
         
         except UserNotFoundException as e:
-            return {
-                "error": str(e)
-            }
+            return {"error": str(e)}
         except Exception as e:
-            return {
-                "error": f"Failed to delete user: {str(e)}"
-            }
+            return {"error": f"Failed to delete user: {str(e)}"}
+
+def delete_user_flow(db_session, args):
+    """Delete a user by ID - synchronous wrapper"""
+    import asyncio
+    return asyncio.run(delete_user_flow_async(db_session, args))

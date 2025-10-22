@@ -1,0 +1,13 @@
+# Web framework
+flask==3.0.0
+flask-cors==4.0.0
+
+# GraphQL
+graphene==3.3
+graphql-core==3.2.3
+graphql-server==3.0.0
+
+# Utilities
+python-dotenv==1.0.0
+watchdog==4.0.0
+requests==2.31.0

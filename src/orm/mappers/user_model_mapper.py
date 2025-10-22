@@ -11,7 +11,7 @@ class UserModelMapper:
         
         return UserEntity(
             id=model.id,
-            email=Email(model.email),
+            email=model.email,
             first_name=model.first_name,
             last_name=model.last_name,
             phone=model.phone,
@@ -28,7 +28,7 @@ class UserModelMapper:
         
         return UserModel(
             id=entity.id,
-            email=entity.email.value,
+            email=entity.email,
             first_name=entity.first_name,
             last_name=entity.last_name,
             phone=entity.phone,
