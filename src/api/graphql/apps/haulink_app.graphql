@@ -1,0 +1,6 @@
+# Main schema file for Haulink App
+# Combines common types and order entity
+
+# Import common types and order model
+import "./common/types.graphql"
+import "./models/order.graphql"

@@ -1,0 +1,57 @@
+# Common types for filtering, pagination, and sorting
+# Following Amplify-based schema patterns
+
+# Pagination input
+input PaginationInput {
+  limit: Int
+  nextToken: String
+}
+
+# Pagination result
+type PaginationResult {
+  nextToken: String
+  hasMore: Boolean
+}
+
+# Sort direction enum
+enum SortDirection {
+  ASC
+  DESC
+}
+
+# Sort input
+input SortInput {
+  field: String!
+  direction: SortDirection!
+}
+
+# Common filter operators
+enum FilterOperator {
+  EQ
+  NE
+  GT
+  GTE
+  LT
+  LTE
+  CONTAINS
+  NOT_CONTAINS
+  BEGINS_WITH
+  BETWEEN
+  IN
+  NOT_IN
+}
+
+# Generic filter input
+input FilterInput {
+  field: String!
+  operator: FilterOperator!
+  value: String
+  values: [String]
+}
+
+# Common filter input for queries
+input CommonFilterInput {
+  filters: [FilterInput!]
+  sort: [SortInput!]
+  pagination: PaginationInput
+}
