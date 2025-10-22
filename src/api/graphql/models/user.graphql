@@ -49,6 +49,7 @@ type UserQueryResult {
 # User queries
 type Query {
   getUser(id: ID!): User
+  getUserByEmail(email: String!): User
   listUsers(filter: UserFilterInput): UserQueryResult
 }
 
@@ -65,15 +66,12 @@ input CreateUserInput {
   lastName: String!
   email: String!
   phone: String
-  status: UserStatus!
-  roles: [UserRole!]!
+  roles: [UserRole!]
 }
 
 input UpdateUserInput {
   firstName: String
   lastName: String
-  email: String
   phone: String
   status: UserStatus
-  roles: [UserRole!]
 }

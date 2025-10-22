@@ -11,9 +11,10 @@ if src_path not in sys.path:
 
 # Add individual module paths for better navigation
 module_paths = [
-    os.path.join(src_path, 'controllers'),
-    os.path.join(src_path, 'services'),
-    os.path.join(src_path, 'entities'),
+    os.path.join(src_path, 'handlers'),
+    os.path.join(src_path, 'application'),
+    os.path.join(src_path, 'domain'),
+    os.path.join(src_path, 'orm'),
     os.path.join(src_path, 'adapters'),
     os.path.join(src_path, 'utils'),
 ]
