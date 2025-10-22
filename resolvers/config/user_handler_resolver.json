@@ -1,0 +1,127 @@
+{
+  "handlerName": "user_handler",
+  "description": "Lambda handler for user operations",
+  "datasource": {
+    "name": "UserHandlerDataSource",
+    "description": "Lambda datasource for user operations",
+    "type": "AWS_LAMBDA",
+    "tags": {
+      "Handler": "user_handler"
+    }
+  },
+  "resolvers": {
+    "haulink_app": {
+      "serviceName": "haulink_app",
+      "operations": [
+        {
+          "typeName": "Query",
+          "fieldName": "getUser",
+          "requestMappingTemplate": {
+            "template": "query/request.vtl",
+            "variables": {
+              "operation": "getUser"
+            }
+          },
+          "responseMappingTemplate": {
+            "template": "common/response.vtl"
+          },
+          "tags": {
+            "Operation": "getUser",
+            "Handler": "user_handler",
+            "Service": "haulink_app"
+          }
+        },
+        {
+          "typeName": "Query",
+          "fieldName": "getUserByEmail",
+          "requestMappingTemplate": {
+            "template": "query/request.vtl",
+            "variables": {
+              "operation": "getUserByEmail"
+            }
+          },
+          "responseMappingTemplate": {
+            "template": "common/response.vtl"
+          },
+          "tags": {
+            "Operation": "getUserByEmail",
+            "Handler": "user_handler",
+            "Service": "haulink_app"
+          }
+        },
+        {
+          "typeName": "Query",
+          "fieldName": "listUsers",
+          "requestMappingTemplate": {
+            "template": "query/request.vtl",
+            "variables": {
+              "operation": "listUsers"
+            }
+          },
+          "responseMappingTemplate": {
+            "template": "common/response.vtl"
+          },
+          "tags": {
+            "Operation": "listUsers",
+            "Handler": "user_handler",
+            "Service": "haulink_app"
+          }
+        },
+        {
+          "typeName": "Mutation",
+          "fieldName": "createUser",
+          "requestMappingTemplate": {
+            "template": "mutation/request.vtl",
+            "variables": {
+              "operation": "createUser"
+            }
+          },
+          "responseMappingTemplate": {
+            "template": "common/response.vtl"
+          },
+          "tags": {
+            "Operation": "createUser",
+            "Handler": "user_handler",
+            "Service": "haulink_app"
+          }
+        },
+        {
+          "typeName": "Mutation",
+          "fieldName": "updateUser",
+          "requestMappingTemplate": {
+            "template": "mutation/request.vtl",
+            "variables": {
+              "operation": "updateUser"
+            }
+          },
+          "responseMappingTemplate": {
+            "template": "common/response.vtl"
+          },
+          "tags": {
+            "Operation": "updateUser",
+            "Handler": "user_handler",
+            "Service": "haulink_app"
+          }
+        },
+        {
+          "typeName": "Mutation",
+          "fieldName": "deleteUser",
+          "requestMappingTemplate": {
+            "template": "mutation/request.vtl",
+            "variables": {
+              "operation": "deleteUser"
+            }
+          },
+          "responseMappingTemplate": {
+            "template": "common/response.vtl"
+          },
+          "tags": {
+            "Operation": "deleteUser",
+            "Handler": "user_handler",
+            "Service": "haulink_app"
+          }
+        }
+      ]
+    }
+  }
+}

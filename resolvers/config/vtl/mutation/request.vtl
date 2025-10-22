@@ -1,0 +1,45 @@
+## Mutation Request Mapping Template
+## Maps GraphQL mutation arguments to Lambda function event
+
+{
+  "version": "2017-02-28",
+  "operation": "Invoke",
+  "payload": {
+    "ctx": {
+      "info": {
+        "fieldName": "$context.info.fieldName",
+        "parentTypeName": "$context.info.parentTypeName"
+      },
+      "arguments": {
+        #if($context.arguments.id)
+        "id": "$context.arguments.id"
+        #end
+        #if($context.arguments.input)
+        ,"input": $util.toJson($context.arguments.input)
+        #end
+        #if($context.arguments.email)
+        ,"email": "$context.arguments.email"
+        #end
+        #if($context.arguments.firstName)
+        ,"firstName": "$context.arguments.firstName"
+        #end
+        #if($context.arguments.lastName)
+        ,"lastName": "$context.arguments.lastName"
+        #end
+        #if($context.arguments.phone)
+        ,"phone": "$context.arguments.phone"
+        #end
+        #if($context.arguments.status)
+        ,"status": "$context.arguments.status"
+        #end
+        #if($context.arguments.roles)
+        ,"roles": $util.toJson($context.arguments.roles)
+        #end
+      },
+      "identity": {
+        "sub": "$context.identity.sub",
+        "username": "$context.identity.username"
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+## Query Request Mapping Template
+## Maps GraphQL query arguments to Lambda function event
+
+{
+  "version": "2017-02-28",
+  "operation": "Invoke",
+  "payload": {
+    "ctx": {
+      "info": {
+        "fieldName": "$context.info.fieldName",
+        "parentTypeName": "$context.info.parentTypeName"
+      },
+      "arguments": {
+        #if($context.arguments.id)
+        "id": "$context.arguments.id"
+        #end
+        #if($context.arguments.email)
+        ,"email": "$context.arguments.email"
+        #end
+        #if($context.arguments.filter)
+        ,"filter": $util.toJson($context.arguments.filter)
+        #end
+      },
+      "identity": {
+        "sub": "$context.identity.sub",
+        "username": "$context.identity.username"
+      }
+    }
+  }
+}
