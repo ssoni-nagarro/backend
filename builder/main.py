@@ -4,10 +4,10 @@ import sys
 import argparse
 from pathlib import Path
 
-# Add the build_system directory to the Python path
+# Add the builder directory to the Python path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from builder import Builder
+from build_manager import BuilderManager
 
 def main():
     """Main entry point for the build system"""
@@ -15,7 +15,7 @@ def main():
     parser.add_argument(
         "--project-root", 
         type=Path, 
-        default=Path.cwd().parent,  # Default to parent of build_system directory
+        default=Path.cwd().parent,  # Default to parent of builder directory
         help="Project root directory"
     )
     parser.add_argument(
@@ -32,14 +32,14 @@ def main():
     args = parser.parse_args()
     
     try:
-        builder = Builder(args.project_root, verbose=args.verbose)
+        build_manager = BuilderManager(args.project_root, verbose=args.verbose)
         
         if args.clean_only:
-            builder._clean_build_artifacts()
+            build_manager._clean_build_artifacts()
             print("Build artifacts cleaned successfully!")
             return 0
         
-        success = builder.build_all()
+        success = build_manager.build_all()
         return 0 if success else 1
         
     except Exception as e:
