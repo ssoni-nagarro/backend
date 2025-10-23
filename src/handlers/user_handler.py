@@ -2,7 +2,7 @@
 import json
 from datetime import datetime
 from typing import Optional, List, Dict, Any
-from adapters.database.db_session import DatabaseSession
+from adapters.database.session_factory import DatabaseSessionFactory
 from application.services.user_service import UserService
 from application.dtos.user_dto import UserDTO, CreateUserDTO, UpdateUserDTO
 from application.mappers.user_dto_mapper import UserDTOMapper
@@ -14,14 +14,11 @@ from domain.exceptions.user_exceptions import (
 from orm.repositories.user_respository_impl import UserRepositoryImpl
 
 # Lambda optimization: Create database session outside handler to reduce cold start
-_db_session = None
+_session_factory = DatabaseSessionFactory()
 
 def get_db_session():
     """Get or create database session (Lambda optimized)"""
-    global _db_session
-    if _db_session is None:
-        _db_session = DatabaseSession("sqlite+aiosqlite:///./server/test.db")
-    return _db_session
+    return _session_factory.get_session()
 
 def handler(event, context):
     """Lambda-optimized GraphQL handler for User operations"""

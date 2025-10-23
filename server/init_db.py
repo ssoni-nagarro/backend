@@ -1,4 +1,4 @@
-"""Database initialization and server startup for Flask GraphQL Server"""
+"""Database initialization for Flask GraphQL Server"""
 import asyncio
 import sys
 import os
@@ -13,7 +13,9 @@ from orm.models.user_model import Base
 
 async def create_tables():
     """Create database tables"""
-    db_path = "test.db"
+    # Get the server directory path
+    server_dir = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(server_dir, "test.db")
     
     # Check if database file exists, create if not
     if not os.path.exists(db_path):
@@ -25,7 +27,9 @@ async def create_tables():
     else:
         print(f"📁 SQLite database already exists: {db_path}")
     
-    db_session = DatabaseSession("sqlite+aiosqlite:///./test.db")
+    # Use absolute path for database connection
+    db_url = f"sqlite+aiosqlite:///{db_path}"
+    db_session = DatabaseSession(db_url)
     
     try:
         # Create tables
@@ -48,41 +52,3 @@ def init_database():
     except Exception as e:
         print(f"❌ Error initializing database: {e}")
         return False
-
-def start_server():
-    """Start the Flask GraphQL server"""
-    try:
-        from app import app
-        print("🚀 Starting HauLink GraphQL Server...")
-        print("📡 GraphQL endpoint: http://localhost:8000/graphql")
-        print("🎮 GraphiQL playground: http://localhost:8000/graphql")
-        print("❤️  Health check: http://localhost:8000/health")
-        print("=" * 50)
-        
-        app.run(debug=True, host='0.0.0.0', port=8000)
-    except Exception as e:
-        print(f"❌ Error starting server: {e}")
-        return False
-
-def main():
-    """Main function to initialize database and start server"""
-    print("🗄️  Initializing HauLink GraphQL Server...")
-    print("=" * 50)
-    
-    # Initialize database
-    print("Step 1: Initializing database...")
-    db_success = init_database()
-    
-    if not db_success:
-        print("💥 Database initialization failed!")
-        sys.exit(1)
-    
-    print("✅ Database initialization completed!")
-    print("=" * 50)
-    
-    # Start server
-    print("Step 2: Starting GraphQL server...")
-    start_server()
-
-if __name__ == "__main__":
-    main()

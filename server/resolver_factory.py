@@ -1,37 +1,83 @@
 """Dynamic GraphQL Resolver Factory"""
 import sys
 import os
+import importlib
+import inspect
 from typing import Dict, Any, Optional, Callable, List, Tuple
 from graphene import ObjectType, Field, String, ID, List, Int, Boolean, DateTime
 from datetime import datetime
 import asyncio
+from pathlib import Path
 
 # Add src to path to import our modules
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from resolver_loader import ConfigLoader
-from handlers.user_handler import handler as user_handler
+from resolver_loader import ResolverLoader
 
 class DynamicResolverFactory:
     """Factory for creating GraphQL resolvers dynamically from config"""
     
     def __init__(self):
-        self.config_loader = ConfigLoader("src/api/resolvers")
-        self.handlers = {
-            "user_handler": user_handler
-            # Add more handlers as needed
-        }
+        self.resolver_loader = ResolverLoader("src/api/resolvers")
+        self.handlers = self._discover_handlers()
+    
+    def _discover_handlers(self) -> Dict[str, Callable]:
+        """Dynamically discover and load all handlers from src/handlers directory"""
+        handlers = {}
+        handlers_dir = Path(__file__).parent.parent / "src" / "handlers"
+        
+        if not handlers_dir.exists():
+            print(f"Warning: Handlers directory {handlers_dir} does not exist")
+            return handlers
+        
+        # Get all Python files in the handlers directory
+        handler_files = list(handlers_dir.glob("*.py"))
+        
+        for handler_file in handler_files:
+            # Skip __init__.py files
+            if handler_file.name == "__init__.py":
+                continue
+            
+            try:
+                # Extract module name from file path
+                module_name = f"handlers.{handler_file.stem}"
+                
+                # Import the module
+                module = importlib.import_module(module_name)
+                
+                # Look for a 'handler' function in the module
+                if hasattr(module, 'handler'):
+                    handler_func = getattr(module, 'handler')
+                    
+                    # Verify it's callable
+                    if callable(handler_func):
+                        # Use the filename as the handler name
+                        handler_name = handler_file.stem
+                        handlers[handler_name] = handler_func
+                        print(f"Successfully loaded handler: {handler_name}")
+                    else:
+                        print(f"Warning: 'handler' in {module_name} is not callable")
+                else:
+                    print(f"Warning: No 'handler' function found in {module_name}")
+                    
+            except ImportError as e:
+                print(f"Error importing {handler_file.name}: {e}")
+            except Exception as e:
+                print(f"Unexpected error loading {handler_file.name}: {e}")
+        
+        print(f"Discovered {len(handlers)} handlers: {list(handlers.keys())}")
+        return handlers
     
     def get_field_metadata(self) -> Dict[str, Dict[str, Any]]:
         """Get field metadata for all operations from config"""
         field_metadata = {}
         
         # Get all handlers
-        handlers = self.config_loader.list_handlers()
+        handlers = self.resolver_loader.list_handlers()
         
         for handler_name in handlers:
-            config = self.config_loader.load_config(handler_name)
+            config = self.resolver_loader.load_resolver(handler_name)
             if not config:
                 continue
             
@@ -102,10 +148,10 @@ class DynamicResolverFactory:
         resolvers = {}
         
         # Get all handlers
-        handlers = self.config_loader.list_handlers()
+        handlers = self.resolver_loader.list_handlers()
         
         for handler_name in handlers:
-            config = self.config_loader.load_config(handler_name)
+            config = self.resolver_loader.load_resolver(handler_name)
             if not config:
                 continue
             
@@ -182,10 +228,10 @@ class DynamicResolverFactory:
             "operations": []
         }
         
-        handlers = self.config_loader.list_handlers()
+        handlers = self.resolver_loader.list_handlers()
         
         for handler_name in handlers:
-            config = self.config_loader.load_config(handler_name)
+            config = self.resolver_loader.load_resolver(handler_name)
             if config:
                 info["handlers"].append({
                     "name": handler_name,
