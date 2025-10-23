@@ -13,7 +13,8 @@ src/
 ├── application/       # Application layer (services, DTOs, mappers)
 ├── handlers/          # Handlers (GraphQL resolvers)
 ├── domain/            # Domain layer (entities, repositories, exceptions)
-├── orm/               # ORM layer (models, migrations, repository implementations)
+├── migrations/        # Database migrations
+├── orm/               # ORM layer (models, repository implementations)
 ├── utils/             # Utility functions
 └── requirements.txt   # Core dependencies
 
