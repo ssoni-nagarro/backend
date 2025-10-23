@@ -3,4 +3,4 @@
 
 # Import common types and order model
 import "./common/types.graphql"
-import "./models/order.graphql"
+import "./models/user.graphql"
