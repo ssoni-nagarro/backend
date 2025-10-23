@@ -1,5 +1,6 @@
 from domain.entities.user_entity import UserEntity, UserStatus, UserRole
-from application.dtos.user_dto import UserDTO, CreateUserDTO
+from application.dtos.user_dto import UserDTO, CreateUserDTO, UpdateUserDTO
+from typing import Dict, Any, List
 
 class UserDTOMapper:
     @staticmethod
@@ -33,3 +34,50 @@ class UserDTOMapper:
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc),
         )
+    
+    @staticmethod
+    def from_graphql_args(args: Dict[str, Any]) -> CreateUserDTO:
+        """Convert GraphQL arguments to CreateUserDTO"""
+        # Convert roles from string values to UserRole enums if provided
+        roles = args.get("roles", ["CONTRACTOR"])
+        if roles and isinstance(roles[0], str):
+            roles = [UserRole(role) for role in roles]
+        
+        return CreateUserDTO(
+            email=args.get("email"),
+            first_name=args.get("firstName"),
+            last_name=args.get("lastName"),
+            phone=args.get("phone"),
+            roles=roles
+        )
+    
+    @staticmethod
+    def from_graphql_update_args(args: Dict[str, Any]) -> UpdateUserDTO:
+        """Convert GraphQL update arguments to UpdateUserDTO"""
+        update_dto = UpdateUserDTO()
+        
+        if "firstName" in args:
+            update_dto.first_name = args["firstName"]
+        if "lastName" in args:
+            update_dto.last_name = args["lastName"]
+        if "phone" in args:
+            update_dto.phone = args["phone"]
+        if "status" in args:
+            update_dto.status = UserStatus(args["status"])
+        
+        return update_dto
+    
+    @staticmethod
+    def to_graphql_response(user_dto: UserDTO) -> Dict[str, Any]:
+        """Convert UserDTO to GraphQL response format"""
+        return {
+            "id": user_dto.id,
+            "email": user_dto.email,
+            "firstName": user_dto.first_name,
+            "lastName": user_dto.last_name,
+            "phone": user_dto.phone,
+            "status": user_dto.status.value,
+            "roles": [role.value for role in user_dto.roles],
+            "createdAt": user_dto.created_at,
+            "updatedAt": user_dto.updated_at
+        }

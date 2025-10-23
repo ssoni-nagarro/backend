@@ -10,14 +10,14 @@ import asyncio
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
-from resolvers.config_loader import ConfigLoader
+from resolver_loader import ConfigLoader
 from handlers.user_handler import handler as user_handler
 
 class DynamicResolverFactory:
     """Factory for creating GraphQL resolvers dynamically from config"""
     
     def __init__(self):
-        self.config_loader = ConfigLoader("resolvers/config")
+        self.config_loader = ConfigLoader("src/api/resolvers")
         self.handlers = {
             "user_handler": user_handler
             # Add more handlers as needed

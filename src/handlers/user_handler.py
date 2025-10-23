@@ -5,6 +5,7 @@ from typing import Optional, List, Dict, Any
 from adapters.database.db_session import DatabaseSession
 from application.services.user_service import UserService
 from application.dtos.user_dto import UserDTO, CreateUserDTO, UpdateUserDTO
+from application.mappers.user_dto_mapper import UserDTOMapper
 from domain.exceptions.user_exceptions import (
     UserNotFoundException, 
     UserAlreadyExistsException, 
@@ -19,7 +20,7 @@ def get_db_session():
     """Get or create database session (Lambda optimized)"""
     global _db_session
     if _db_session is None:
-        _db_session = DatabaseSession("sqlite+aiosqlite:///./test.db")
+        _db_session = DatabaseSession("sqlite+aiosqlite:///./server/test.db")
     return _db_session
 
 def handler(event, context):
@@ -77,30 +78,17 @@ async def create_user_flow_async(db_session, args):
         user_service = UserService(user_repository)
         
         try:
-            # Create user DTO from arguments
-            create_dto = CreateUserDTO(
-                email=args.get("email"),
-                first_name=args.get("firstName"),
-                last_name=args.get("lastName"),
-                phone=args.get("phone"),
-                roles=args.get("roles", ["CONTRACTOR"])
-            )
+            # Convert GraphQL args to CreateUserDTO using mapper
+            create_dto = UserDTOMapper.from_graphql_args(args)
             
             # Create user
             user = await user_service.create_user(create_dto)
             
-            return {
-                "status": "success",
-                "id": user.id,
-                "email": user.email,
-                "firstName": user.first_name,
-                "lastName": user.last_name,
-                "phone": user.phone,
-                "status": user.status.value,
-                "roles": [role.value for role in user.roles],
-                "createdAt": user.created_at,
-                "updatedAt": user.updated_at
-            }
+            # Convert UserDTO to GraphQL response format using mapper
+            response = UserDTOMapper.to_graphql_response(user)
+            response["status"] = "success"
+            
+            return response
         
         except UserAlreadyExistsException as e:
             return {"error": str(e)}
@@ -129,17 +117,8 @@ async def get_user_flow_async(db_session, args):
             
             user = await user_service.get_user_by_id(user_id)
             
-            return {
-                "id": user.id,
-                "email": user.email,
-                "firstName": user.first_name,
-                "lastName": user.last_name,
-                "phone": user.phone,
-                "status": user.status.value,
-                "roles": [role.value for role in user.roles],
-                "createdAt": user.created_at,
-                "updatedAt": user.updated_at
-            }
+            # Convert UserDTO to GraphQL response format using mapper
+            return UserDTOMapper.to_graphql_response(user)
         
         except UserNotFoundException as e:
             return {"error": str(e)}
@@ -164,17 +143,8 @@ async def get_user_by_email_flow_async(db_session, args):
             
             user = await user_service.get_user_by_email(email)
             
-            return {
-                "id": user.id,
-                "email": user.email,
-                "firstName": user.first_name,
-                "lastName": user.last_name,
-                "phone": user.phone,
-                "status": user.status.value,
-                "roles": [role.value for role in user.roles],
-                "createdAt": user.created_at,
-                "updatedAt": user.updated_at
-            }
+            # Convert UserDTO to GraphQL response format using mapper
+            return UserDTOMapper.to_graphql_response(user)
         
         except UserNotFoundException as e:
             return {"error": str(e)}
@@ -201,20 +171,7 @@ async def list_users_flow_async(db_session, args):
             users = await user_service.get_all_users(skip=skip, limit=limit)
             
             return {
-                "items": [
-                    {
-                        "id": user.id,
-                        "email": user.email,
-                        "firstName": user.first_name,
-                        "lastName": user.last_name,
-                        "phone": user.phone,
-                        "status": user.status.value,
-                        "roles": [role.value for role in user.roles],
-                        "createdAt": user.created_at,
-                        "updatedAt": user.updated_at
-                    }
-                    for user in users
-                ],
+                "items": [UserDTOMapper.to_graphql_response(user) for user in users],
                 "pagination": {
                     "skip": skip,
                     "limit": limit,
@@ -241,31 +198,13 @@ async def update_user_flow_async(db_session, args):
             if not user_id:
                 return {"error": "User ID is required"}
             
-            # Extract update fields
-            update_data = UpdateUserDTO()
-            if "firstName" in args:
-                update_data.first_name = args["firstName"]
-            if "lastName" in args:
-                update_data.last_name = args["lastName"]
-            if "phone" in args:
-                update_data.phone = args["phone"]
-            if "status" in args:
-                from domain.entities.user_entity import UserStatus
-                update_data.status = UserStatus(args["status"])
+            # Convert GraphQL update args to UpdateUserDTO using mapper
+            update_data = UserDTOMapper.from_graphql_update_args(args)
             
             user = await user_service.update_user(user_id, update_data)
             
-            return {
-                "id": user.id,
-                "email": user.email,
-                "firstName": user.first_name,
-                "lastName": user.last_name,
-                "phone": user.phone,
-                "status": user.status.value,
-                "roles": [role.value for role in user.roles],
-                "createdAt": user.created_at,
-                "updatedAt": user.updated_at
-            }
+            # Convert UserDTO to GraphQL response format using mapper
+            return UserDTOMapper.to_graphql_response(user)
         
         except UserNotFoundException as e:
             return {"error": str(e)}
