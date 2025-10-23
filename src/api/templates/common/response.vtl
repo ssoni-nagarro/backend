@@ -1,0 +1,12 @@
+## Common Response Mapping Template
+## Maps Lambda function response back to GraphQL response
+
+#if($context.result.error)
+{
+  "error": {
+    "message": "$context.result.error"
+  }
+}
+#else
+$util.toJson($context.result)
+#end

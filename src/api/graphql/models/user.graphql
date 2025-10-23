@@ -1,0 +1,77 @@
+# User entity schema
+# Basic user fields and queries
+
+type User {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  status: UserStatus!
+  roles: [UserRole!]!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+  DELETED
+}
+
+enum UserRole {
+  ADMIN
+  CONTRACTOR
+  HAULER
+  SUBHAULER
+}
+
+# User filter input extending common filter
+input UserFilterInput {
+  filters: [FilterInput!]
+  sort: [SortInput!]
+  pagination: PaginationInput
+  # User-specific filters
+  status: UserStatus
+  roles: [UserRole!]
+  emailContains: String
+  nameContains: String
+}
+
+# User query result
+type UserQueryResult {
+  items: [User!]!
+  pagination: PaginationResult
+}
+
+# User queries
+type Query {
+  getUser(id: ID!): User
+  getUserByEmail(email: String!): User
+  listUsers(filter: UserFilterInput): UserQueryResult
+}
+
+# User mutations
+type Mutation {
+  createUser(input: CreateUserInput!): User
+  updateUser(id: ID!, input: UpdateUserInput!): User
+  deleteUser(id: ID!): Boolean
+}
+
+# User input types
+input CreateUserInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  roles: [UserRole!]
+}
+
+input UpdateUserInput {
+  firstName: String
+  lastName: String
+  phone: String
+  status: UserStatus
+}
