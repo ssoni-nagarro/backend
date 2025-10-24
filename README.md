@@ -1,4 +1,4 @@
-# HauLink Backend API
+# Haulink Backend
 
 A clean architecture implementation for aws lambda handler based application.
 
@@ -31,25 +31,64 @@ resolvers/
 
 ## Setup
 
-### Core Dependencies (src folder)
-1. **Install core dependencies**:
+### Prerequisites
+- Python 3.8 or higher
+- pip (Python package installer)
+
+### Quick Start
+
+1. **Clone the repository and navigate to the project**:
    ```bash
-   pip install -r src/requirements.txt
+   cd backend
    ```
 
-### GraphQL Server (server folder)
-1. **Install server dependencies**:
+2. **Create and activate a virtual environment**:
    ```bash
+   # Create virtual environment
+   python -m venv venv
+   
+   # Activate virtual environment
+   # On macOS/Linux:
+   source venv/bin/activate
+   # On Windows:
+   venv\Scripts\activate
+   ```
+
+3. **Install dependencies**:
+   ```bash
+   # Install core dependencies (domain, application, and ORM layers)
+   pip install -r src/requirements.txt
+   
+   # Install server dependencies (Flask, GraphQL, etc.)
    pip install -r server/requirements.txt
    ```
 
-2. **Initialize database and start server**:
+4. **Start the GraphQL server**:
    ```bash
-   python server/init_db.py
+   # Initialize database and start the server
+   python server/main.py
    ```
 
-3. **Access GraphiQL playground**:
-   - Open http://localhost:5000/graphql in your browser
+5. **Access the application**:
+   - **GraphQL Playground**: http://localhost:8000/graphql
+   - **Health Check**: http://localhost:8000/health
+
+### Build System
+
+To build files for AWS deployment:
+
+```bash
+# Build artifacts
+python3 builder/main.py
+
+# Build artifacts with verbose output
+python3 builder/main.py --verbose
+
+# Clean build artifacts
+python3 builder/main.py --clean
+```
+
+
 
 ## Architecture Notes
 

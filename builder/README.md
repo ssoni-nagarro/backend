@@ -19,11 +19,11 @@ The build system processes GraphQL schema files from the `src/api/graphql/apps/`
 ### Basic Usage
 
 ```bash
-# From the build_system directory
+# From the builder directory
 python3 build.py
 
 # Or from the project root
-python3 build_system/build.py
+python3 builder/build.py
 ```
 
 ### Advanced Usage

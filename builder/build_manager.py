@@ -2,11 +2,11 @@
 from pathlib import Path
 from config import Config
 from logger import Logger
-from builders.lambda_builder import LambdaBuilder
-from builders.layer_builder import LayerBuilder
-from builders.appsync_builder import AppSyncBuilder
+from components.lambda_builder import LambdaBuilder
+from components.layer_builder import LayerBuilder
+from components.appsync_builder import AppSyncBuilder
 
-class Builder:
+class BuilderManager:
     """Main build orchestrator"""
     
     def __init__(self, project_root: Path, verbose: bool = False):
