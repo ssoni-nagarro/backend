@@ -20,13 +20,9 @@ src/
 
 server/
 ├── app.py             # Flask GraphQL server
-├── init_db.py         # Database initialization and server startup
-├── requirements.txt   # Server-specific dependencies
-└── README.md          # Server documentation
-
-resolvers/
-├── config/            # Resolver configurations
-└── resolver_loader.py # Resolver configuration loader
+├── init_db.py         # Database initialization
+├── main.py            # Server startup
+└── requirements.txt   # Server-specific dependencies
 ```
 
 ## Setup
@@ -87,7 +83,6 @@ python3 builder/main.py --verbose
 # Clean build artifacts
 python3 builder/main.py --clean
 ```
-
 
 
 ## Architecture Notes
