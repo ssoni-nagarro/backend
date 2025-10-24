@@ -1,5 +1,4 @@
 """Database initialization for Flask GraphQL Server"""
-import asyncio
 import sys
 import os
 import sqlite3
@@ -11,7 +10,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 from adapters.database.db_session import DatabaseSession
 from orm.models.user_model import Base
 
-async def create_tables():
+def create_tables():
     """Create database tables"""
     # Get the server directory path
     server_dir = os.path.dirname(os.path.abspath(__file__))
@@ -28,13 +27,12 @@ async def create_tables():
         print(f"📁 SQLite database already exists: {db_path}")
     
     # Use absolute path for database connection
-    db_url = f"sqlite+aiosqlite:///{db_path}"
+    db_url = f"sqlite:///{db_path}"
     db_session = DatabaseSession(db_url)
     
     try:
-        # Create tables
-        async with db_session.engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+        # Create tables using sync SQLAlchemy
+        Base.metadata.create_all(db_session.engine)
         
         print("✅ Database tables created successfully!")
         return True
@@ -42,12 +40,12 @@ async def create_tables():
         print(f"❌ Error creating database tables: {e}")
         return False
     finally:
-        await db_session.close()
+        db_session.close()
 
 def init_database():
     """Initialize database synchronously"""
     try:
-        result = asyncio.run(create_tables())
+        result = create_tables()
         return result
     except Exception as e:
         print(f"❌ Error initializing database: {e}")

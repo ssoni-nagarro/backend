@@ -6,7 +6,6 @@ import inspect
 from typing import Dict, Any, Optional, Callable, List, Tuple
 from graphene import ObjectType, Field, String, ID, List, Int, Boolean, DateTime
 from datetime import datetime
-import asyncio
 from pathlib import Path
 
 # Add src to path to import our modules
