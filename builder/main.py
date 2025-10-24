@@ -9,13 +9,33 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from build_manager import BuilderManager
 
+def _detect_project_root() -> Path:
+    """Detect the project root directory automatically"""
+    current_dir = Path.cwd()
+    
+    # If we're in the builder directory, go up one level
+    if current_dir.name == "builder":
+        return current_dir.parent
+    
+    # If we're in the backend directory, use current directory
+    if current_dir.name == "backend":
+        return current_dir
+    
+    # Look for the backend directory in the current path
+    for parent in current_dir.parents:
+        if parent.name == "backend":
+            return parent
+    
+    # Fallback: assume current directory is project root
+    return current_dir
+
 def main():
     """Main entry point for the build system"""
     parser = argparse.ArgumentParser(description="Build artifacts")
     parser.add_argument(
         "--project-root", 
         type=Path, 
-        default=Path.cwd().parent,  # Default to parent of builder directory
+        default=_detect_project_root(),  # Auto-detect project root
         help="Project root directory"
     )
     parser.add_argument(
@@ -24,7 +44,7 @@ def main():
         help="Enable verbose logging"
     )
     parser.add_argument(
-        "--clean-only", 
+        "--clean", 
         action="store_true", 
         help="Only clean build artifacts, don't build"
     )
@@ -34,7 +54,7 @@ def main():
     try:
         build_manager = BuilderManager(args.project_root, verbose=args.verbose)
         
-        if args.clean_only:
+        if args.clean:
             build_manager._clean_build_artifacts()
             print("Build artifacts cleaned successfully!")
             return 0
