@@ -34,7 +34,7 @@ class DatabaseSessionFactory:
             # Final fallback - assume we're running from server directory
             server_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'server')
             db_path = os.path.join(server_dir, "test.db")
-            return f"sqlite+aiosqlite:///{db_path}"
+            return f"sqlite:///{db_path}"
     
     def get_session(self) -> DatabaseSession:
         """Get or create database session (Lambda optimized)"""

@@ -14,7 +14,7 @@ def get_database_url():
     # Default to server directory
     server_dir = os.path.dirname(os.path.abspath(__file__))
     db_path = os.path.join(server_dir, "test.db")
-    return f"sqlite+aiosqlite:///{db_path}"
+    return f"sqlite:///{db_path}"
 
 class Config:
     """Base configuration"""

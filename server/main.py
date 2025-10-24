@@ -6,11 +6,11 @@ import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from init_db import init_database
+from app import app
 
 def start_server():
     """Start the Flask GraphQL server"""
     try:
-        from app import app
         print("🚀 Starting HauLink GraphQL Server...")
         print("📡 GraphQL endpoint: http://localhost:8000/graphql")
         print("🎮 GraphiQL playground: http://localhost:8000/graphql")

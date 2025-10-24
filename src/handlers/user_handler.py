@@ -67,10 +67,9 @@ def handler(event, context):
         }
     # Note: Don't close database session in Lambda - keep it for reuse
 
-# Async flow functions - can be called directly
-async def create_user_flow_async(db_session, args):
+def create_user_flow(db_session, args):
     """Coordinate user creation"""
-    async for session in db_session.get_session():
+    for session in db_session.get_session():
         user_repository = UserRepositoryImpl(session)
         user_service = UserService(user_repository)
         
@@ -79,11 +78,10 @@ async def create_user_flow_async(db_session, args):
             create_dto = UserDTOMapper.from_graphql_args(args)
             
             # Create user
-            user = await user_service.create_user(create_dto)
+            user = user_service.create_user(create_dto)
             
             # Convert UserDTO to GraphQL response format using mapper
             response = UserDTOMapper.to_graphql_response(user)
-            response["status"] = "success"
             
             return response
         
@@ -96,14 +94,9 @@ async def create_user_flow_async(db_session, args):
     
     return {"error": "No database session available"}
 
-def create_user_flow(db_session, args):
-    """Coordinate user creation - synchronous wrapper"""
-    import asyncio
-    return asyncio.run(create_user_flow_async(db_session, args))
-
-async def get_user_flow_async(db_session, args):
+def get_user_flow(db_session, args):
     """Get a single user by ID"""
-    async for session in db_session.get_session():
+    for session in db_session.get_session():
         user_repository = UserRepositoryImpl(session)
         user_service = UserService(user_repository)
         
@@ -112,7 +105,7 @@ async def get_user_flow_async(db_session, args):
             if not user_id:
                 return {"error": "User ID is required"}
             
-            user = await user_service.get_user_by_id(user_id)
+            user = user_service.get_user_by_id(user_id)
             
             # Convert UserDTO to GraphQL response format using mapper
             return UserDTOMapper.to_graphql_response(user)
@@ -122,14 +115,9 @@ async def get_user_flow_async(db_session, args):
         except Exception as e:
             return {"error": f"Failed to get user: {str(e)}"}
 
-def get_user_flow(db_session, args):
-    """Get a single user by ID - synchronous wrapper"""
-    import asyncio
-    return asyncio.run(get_user_flow_async(db_session, args))
-
-async def get_user_by_email_flow_async(db_session, args):
+def get_user_by_email_flow(db_session, args):
     """Get a single user by email"""
-    async for session in db_session.get_session():
+    for session in db_session.get_session():
         user_repository = UserRepositoryImpl(session)
         user_service = UserService(user_repository)
         
@@ -138,7 +126,7 @@ async def get_user_by_email_flow_async(db_session, args):
             if not email:
                 return {"error": "Email is required"}
             
-            user = await user_service.get_user_by_email(email)
+            user = user_service.get_user_by_email(email)
             
             # Convert UserDTO to GraphQL response format using mapper
             return UserDTOMapper.to_graphql_response(user)
@@ -148,14 +136,9 @@ async def get_user_by_email_flow_async(db_session, args):
         except Exception as e:
             return {"error": f"Failed to get user by email: {str(e)}"}
 
-def get_user_by_email_flow(db_session, args):
-    """Get a single user by email - synchronous wrapper"""
-    import asyncio
-    return asyncio.run(get_user_by_email_flow_async(db_session, args))
-
-async def list_users_flow_async(db_session, args):
+def list_users_flow(db_session, args):
     """List users with filtering and pagination"""
-    async for session in db_session.get_session():
+    for session in db_session.get_session():
         user_repository = UserRepositoryImpl(session)
         user_service = UserService(user_repository)
         
@@ -165,7 +148,7 @@ async def list_users_flow_async(db_session, args):
             limit = args.get("limit", 20)
             
             # Get users from service
-            users = await user_service.get_all_users(skip=skip, limit=limit)
+            users = user_service.get_all_users(skip=skip, limit=limit)
             
             return {
                 "items": [UserDTOMapper.to_graphql_response(user) for user in users],
@@ -179,14 +162,9 @@ async def list_users_flow_async(db_session, args):
         except Exception as e:
             return {"error": f"Failed to list users: {str(e)}"}
 
-def list_users_flow(db_session, args):
-    """List users with filtering and pagination - synchronous wrapper"""
-    import asyncio
-    return asyncio.run(list_users_flow_async(db_session, args))
-
-async def update_user_flow_async(db_session, args):
+def update_user_flow(db_session, args):
     """Update an existing user"""
-    async for session in db_session.get_session():
+    for session in db_session.get_session():
         user_repository = UserRepositoryImpl(session)
         user_service = UserService(user_repository)
         
@@ -198,7 +176,7 @@ async def update_user_flow_async(db_session, args):
             # Convert GraphQL update args to UpdateUserDTO using mapper
             update_data = UserDTOMapper.from_graphql_update_args(args)
             
-            user = await user_service.update_user(user_id, update_data)
+            user = user_service.update_user(user_id, update_data)
             
             # Convert UserDTO to GraphQL response format using mapper
             return UserDTOMapper.to_graphql_response(user)
@@ -210,14 +188,9 @@ async def update_user_flow_async(db_session, args):
         except Exception as e:
             return {"error": f"Failed to update user: {str(e)}"}
 
-def update_user_flow(db_session, args):
-    """Update an existing user - synchronous wrapper"""
-    import asyncio
-    return asyncio.run(update_user_flow_async(db_session, args))
-
-async def delete_user_flow_async(db_session, args):
+def delete_user_flow(db_session, args):
     """Delete a user by ID"""
-    async for session in db_session.get_session():
+    for session in db_session.get_session():
         user_repository = UserRepositoryImpl(session)
         user_service = UserService(user_repository)
         
@@ -226,7 +199,7 @@ async def delete_user_flow_async(db_session, args):
             if not user_id:
                 return {"error": "User ID is required"}
             
-            success = await user_service.delete_user(user_id)
+            success = user_service.delete_user(user_id)
             
             if not success:
                 return {"error": f"User with id {user_id} not found"}
@@ -240,8 +213,3 @@ async def delete_user_flow_async(db_session, args):
             return {"error": str(e)}
         except Exception as e:
             return {"error": f"Failed to delete user: {str(e)}"}
-
-def delete_user_flow(db_session, args):
-    """Delete a user by ID - synchronous wrapper"""
-    import asyncio
-    return asyncio.run(delete_user_flow_async(db_session, args))
