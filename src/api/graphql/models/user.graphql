@@ -9,8 +9,8 @@ type User {
   phone: String
   status: UserStatus!
   roles: [UserRole!]!
-  createdAt: AWSDateTime!
-  updatedAt: AWSDateTime!
+  createdAt: String!
+  updatedAt: String!
 }
 
 enum UserStatus {

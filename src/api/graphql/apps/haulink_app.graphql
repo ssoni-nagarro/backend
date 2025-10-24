@@ -2,5 +2,5 @@
 # Combines common types and order entity
 
 # Import common types and order model
-import "./common/types.graphql"
-import "./models/user.graphql"
+import "../common/types.graphql"
+import "../models/user.graphql"

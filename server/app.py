@@ -12,14 +12,14 @@ from typing import Dict, Any, Optional
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from resolver_factory import resolver_factory
+from schema_loader import GraphQLSchemaLoader
 
 app = Flask(__name__)
 CORS(app)
 
-# Load GraphQL schema from single schema file
-schema_file = os.path.join(os.path.dirname(__file__), '..', 'src', 'api', 'graphql', 'schema.graphql')
-with open(schema_file, 'r') as f:
-    type_defs = f.read()
+# Load and compile GraphQL schema using schema loader
+schema_loader = GraphQLSchemaLoader()
+type_defs = schema_loader.load_schema("haulink_app")
 
 # Create Query and Mutation types
 query = QueryType()
