@@ -1,0 +1,5 @@
+type Query {
+  getUser(id: ID!): User
+  getUserByEmail(email: String!): User
+  listUsers(filter: UserFilterInput): UserQueryResult
+}

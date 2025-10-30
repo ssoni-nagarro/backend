@@ -1,0 +1,13 @@
+# Main schema file for Haulink App
+
+import "./types/user.graphql"
+import "./types/common.graphql"
+import "./operations/query.graphql"
+import "./operations/mutation.graphql"
+import "./operations/subscription.graphql"
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}

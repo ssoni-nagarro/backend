@@ -1,6 +1,3 @@
-# User entity schema
-# Basic user fields and queries
-
 type User {
   id: ID!
   firstName: String!
@@ -44,20 +41,6 @@ input UserFilterInput {
 type UserQueryResult {
   items: [User!]!
   pagination: PaginationResult
-}
-
-# User queries
-type Query {
-  getUser(id: ID!): User
-  getUserByEmail(email: String!): User
-  listUsers(filter: UserFilterInput): UserQueryResult
-}
-
-# User mutations
-type Mutation {
-  createUser(input: CreateUserInput!): User
-  updateUser(id: ID!, input: UpdateUserInput!): User
-  deleteUser(id: ID!): Boolean
 }
 
 # User input types

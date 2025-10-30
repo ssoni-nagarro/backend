@@ -1,6 +1,3 @@
-# Common types for filtering, pagination, and sorting
-# Following Amplify-based schema patterns
-
 # Pagination input
 input PaginationInput {
   limit: Int
