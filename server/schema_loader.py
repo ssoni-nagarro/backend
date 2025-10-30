@@ -72,13 +72,13 @@ def compile_graphql_schema(base_file_path: str) -> str:
 class GraphQLSchemaLoader:
     """Loads and processes GraphQL schema from .graphql files with import support"""
     
-    def __init__(self, graphql_dir: str = "../src/api/graphql"):
-        self.graphql_dir = Path(__file__).parent / graphql_dir
+    def __init__(self, graphql_dir: str = "./src/api/graphql"):
+        self.graphql_dir = Path(__file__).parent.parent / graphql_dir
         self.processed_files: Set[str] = set()
         
     def load_schema(self, schema_name: str = "haulink_app") -> str:
         """Load and combine GraphQL schema from files using the compile_graphql_schema function"""
-        schema_file = self.graphql_dir / "apps" / f"{schema_name}.graphql"
+        schema_file = self.graphql_dir / f"{schema_name}.graphql"
 
         if not schema_file.exists():
             raise FileNotFoundError(f"Schema file not found: {schema_file}")
