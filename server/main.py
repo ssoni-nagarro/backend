@@ -31,12 +31,17 @@ def start_server():
         print("🎮 GraphiQL playground: http://localhost:8000/graphql")
         print("❤️  Health check: http://localhost:8000/health")
         print("=" * 50)
-        print("💡 Press Ctrl+C or Ctrl+Z to stop the server")
+        if hasattr(signal, 'SIGTSTP'):
+            print("💡 Press Ctrl+C or Ctrl+Z to stop the server")
+        else:
+            print("💡 Press Ctrl+C to stop the server")
         print("=" * 50)
         
         # Set up signal handlers
         signal.signal(signal.SIGINT, signal_handler)
-        signal.signal(signal.SIGTSTP, signal_handler)
+        # SIGTSTP is Unix-only (Ctrl+Z), so only register on Unix-like systems
+        if hasattr(signal, 'SIGTSTP'):
+            signal.signal(signal.SIGTSTP, signal_handler)
         
         # Start Flask app in a separate thread
         def run_flask():

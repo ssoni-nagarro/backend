@@ -1,10 +1,10 @@
 # Flask GraphQL Server
 
-A Flask-based GraphQL server with Graphene that provides a GraphiQL playground for testing the GraphQL API end-to-end.
+A Flask-based GraphQL server that provides a GraphiQL playground for testing the GraphQL API end-to-end.
 
 ## Features
 
-- **Flask + Graphene**: Modern GraphQL server implementation
+- **Flask**: Modern GraphQL server implementation
 - **GraphiQL Playground**: Interactive GraphQL query interface
 - **Clean Architecture**: Uses existing src folder structure
 - **CORS Enabled**: Cross-origin requests supported

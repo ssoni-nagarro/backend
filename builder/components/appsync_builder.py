@@ -10,14 +10,17 @@ class AppSyncBuilder(BaseBuilder):
     def discover(self) -> List[str]:
         """Discover GraphQL schemas"""
         schemas = []
-        graphql_apps = self.config.graphql_dir / "apps"
         
-        if not graphql_apps.exists():
-            self.logger.warning(f"GraphQL apps directory not found: {graphql_apps}")
+        if not self.config.graphql_dir.exists():
+            self.logger.warning(f"GraphQL directory not found: {self.config.graphql_dir}")
             return schemas
         
-        for item in graphql_apps.glob("*.graphql"):
-            schemas.append(item.stem)
+        # Discover all .graphql files directly in the graphql_dir (excluding subdirectories)
+        for schema_file in self.config.graphql_dir.glob("*.graphql"):
+            schemas.append(schema_file.stem)
+        
+        if not schemas:
+            self.logger.warning(f"No GraphQL schema files found in: {self.config.graphql_dir}")
         
         return sorted(schemas)
     
@@ -26,7 +29,7 @@ class AppSyncBuilder(BaseBuilder):
         try:
             self.logger.info(f"Building schema: {schema_name}", schema_name)
             
-            schema_file = self.config.graphql_dir / "apps" / f"{schema_name}.graphql"
+            schema_file = self.config.graphql_dir / f"{schema_name}.graphql"
             output_file = self.config.appsync_dir / f"{schema_name}.graphql"
             
             if not schema_file.exists():
